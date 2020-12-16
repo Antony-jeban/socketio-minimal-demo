@@ -12,6 +12,7 @@ router.get('/', (req, res) => {
 });
 
 app.use(cors());
+app.use(router);
 
 const io = require('socket.io')(http, {
     cors: { origin: "*" }

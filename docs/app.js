@@ -1,30 +1,37 @@
+const socket = io('ws://localhost:8080');
 
-const socket = io('https://simple-chat-ap.herokuapp.com/');
+const userName = prompt('Enter your name');
+const input = document.querySelector('.userMessage');
+const inputText = document.querySelector('input')
 
-socket.on('message', text => {
+if (userName) {
+    console.log(userName);
+    socket.emit('username', userName);
+}
 
-    const el = document.createElement('li');
-    el.innerHTML = text;
-    document.querySelector('ul').appendChild(el)
+socket.on('displayMessage', data => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="user">${data.userName}</span>: ${data.message}`;
+    document.querySelector('ul').appendChild(li)
+});
 
+socket.on('userConnected', data => {
+    const li = document.createElement('li');
+    li.innerHTML = `Welcome ${data}, who just joined the chat`;
+    document.querySelector('ul').appendChild(li)
 });
 
 document.querySelector('button').onclick = () => {
-
-    const text = document.querySelector('input').value;
-    socket.emit('message', text)
-    
+    if (inputText.value) {
+        socket.emit('message', inputText.value);
+    }
+    document.querySelector('input').value = '';
 }
 
-// Regular Websockets
-
-// const socket = new WebSocket('ws://localhost:8080');
-
-// // Listen for messages
-// socket.onmessage = ({ data }) => {
-//     console.log('Message from server ', data);
-// };
-
-// document.querySelector('button').onclick = () => {
-//     socket.send('hello');
-// }
+input.addEventListener("keyup", function (event) {
+    if (event.keyCode === 13 && inputText.value) {
+        event.preventDefault();
+        socket.emit('message', inputText.value);
+        document.querySelector('input').value = '';
+    }
+});

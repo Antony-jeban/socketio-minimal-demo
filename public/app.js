@@ -1,5 +1,5 @@
 
-const socket = io('ws://localhost:8080');
+const socket = io('ws://simple-chat-ap.herokuapp.com/');
 
 socket.on('message', text => {
 

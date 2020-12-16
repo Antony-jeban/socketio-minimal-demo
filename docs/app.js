@@ -1,4 +1,4 @@
-const socket = io('ws://localhost:8080');
+const socket = io('https://simple-chat-ap.herokuapp.com/');
 
 const userName = prompt('Enter your name');
 const input = document.querySelector('.userMessage');

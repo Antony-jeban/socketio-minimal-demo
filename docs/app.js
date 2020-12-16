@@ -1,30 +1,36 @@
+const socket = io('ws://localhost:8080');
 
-const socket = io('https://simple-chat-ap.herokuapp.com/');
+const chat = document.querySelector('.chat');
+const loginPage = document.querySelector('.login');
+const userName = document.querySelector('.usernameInput');
 
-socket.on('message', text => {
+console.log(chat);
+console.log(loginPage);
+chat.style.display = 'none';
 
-    const el = document.createElement('li');
-    el.innerHTML = text;
-    document.querySelector('ul').appendChild(el)
-
+document.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter' && userName.value !== '') {
+        if (loginPage.style.display === 'none') {
+            const text = document.querySelector('.inputMessage').value;
+            socket.emit('new message', text)
+        }
+        if (userName.value && userName.value !== 'a') {
+            socket.emit('add user', userName.value);
+            userName.value = 'a';
+        }
+        loginPage.style.display = 'none';
+        chat.style.display = '';
+    }
 });
 
-document.querySelector('button').onclick = () => {
-
-    const text = document.querySelector('input').value;
-    socket.emit('message', text)
-    
-}
-
-// Regular Websockets
-
-// const socket = new WebSocket('ws://localhost:8080');
-
-// // Listen for messages
-// socket.onmessage = ({ data }) => {
-//     console.log('Message from server ', data);
-// };
+socket.on('new message', text => {
+    const el = document.createElement('li');
+    el.innerHTML = `${text.username} Send: ${text.message}`;
+    document.querySelector('ul').appendChild(el)
+});
 
 // document.querySelector('button').onclick = () => {
-//     socket.send('hello');
-// }
+//     const text = document.querySelector('.inputMessage').value;
+//     socket.emit('message', text)
+//     document.querySelector('input').value = '';
+// };

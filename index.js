@@ -20,11 +20,61 @@ const io = require('socket.io')(http, {
 
 io.on('connection', (socket) => {
     console.log('a user connected');
+    let addedUser = false;
 
-    socket.on('message', (message) =>     {
-        console.log(message);
-        io.emit('message', `${socket.id.substr(0,2)} said ${message}` );   
+  // when the client emits 'new message', this listens and executes
+  socket.on('new message', (data) => {
+    // we tell the client to execute 'new message'
+    io.emit('new message', {
+      username: socket.username,
+      message: data
     });
+  });
+
+  // when the client emits 'add user', this listens and executes
+  socket.on('add user', (username) => {
+    if (addedUser) return;
+
+    // we store the username in the socket session for this client
+    socket.username = username;
+    ++numUsers;
+    addedUser = true;
+    socket.emit('login', {
+      numUsers: numUsers
+    });
+    // echo globally (all clients) that a person has connected
+    io.emit('user joined', {
+      username: socket.username,
+      numUsers: numUsers
+    });
+  });
+
+  // when the client emits 'typing', we broadcast it to others
+  socket.on('typing', () => {
+    io.emit('typing', {
+      username: socket.username
+    });
+  });
+
+  // when the client emits 'stop typing', we broadcast it to others
+  socket.on('stop typing', () => {
+    io.emit('stop typing', {
+      username: socket.username
+    });
+  });
+
+  // when the user disconnects.. perform this
+  socket.on('disconnect', () => {
+    if (addedUser) {
+      --numUsers;
+
+      // echo globally that this client has left
+      io.emit('user left', {
+        username: socket.username,
+        numUsers: numUsers
+      });
+    }
+  });
 });
 
 http.listen(port, () => console.log(`listening on http://localhost:8080`) );
